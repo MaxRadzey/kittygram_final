@@ -1,26 +1,88 @@
-#  Как работать с репозиторием финального задания
+# Проект «Kittygram»
 
-## Что нужно сделать
+## Содержание
+- [Авторы](#авторы)
+- [Описание](#описание)
+- [Технологии](#технологии)
+- [Как запустить проект](#Как-запустить-проект)
+- [Примеры запросов к API](#Примеры-запросов-к-API)
 
-Настроить запуск проекта Kittygram в контейнерах и CI/CD с помощью GitHub Actions
+##  Авторы
 
-## Как проверить работу с помощью автотестов
+- [Maxim Radzey](https://github.com/MaxRadzey)
 
-В корне репозитория создайте файл tests.yml со следующим содержимым:
-```yaml
-repo_owner: ваш_логин_на_гитхабе
-kittygram_domain: полная ссылка (https://доменное_имя) на ваш проект Kittygram
-taski_domain: полная ссылка (https://доменное_имя) на ваш проект Taski
-dockerhub_username: ваш_логин_на_докерхабе
+##  Описание
+Проект Kittygram представляет собой социальную сеть для любителей и хозяев котов. Здесь деляться общей информацией и фотграфиями птиомцев. 
+
+## Технологии
+- [Django](https://docs.djangoproject.com/en/stable/)
+- [Python 3.11](https://www.python.org)
+- [Django REST framework](https://www.django-rest-framework.org)
+- Gunicorn
+
+### Как запустить проект:
+
+Клонировать репозиторий:
+
+```
+git@github.com:MaxRadzey/kittygram_final.git
 ```
 
-Скопируйте содержимое файла `.github/workflows/main.yml` в файл `kittygram_workflow.yml` в корневой директории проекта.
+Скачать файл:
 
-Для локального запуска тестов создайте виртуальное окружение, установите в него зависимости из backend/requirements.txt и запустите в корневой директории проекта `pytest`.
+```
+docker-compose.production.yml
+```
 
-## Чек-лист для проверки перед отправкой задания
+Создать файл .env и указать актуальные данные
 
-- Проект Taski доступен по доменному имени, указанному в `tests.yml`.
-- Проект Kittygram доступен по доменному имени, указанному в `tests.yml`.
-- Пуш в ветку main запускает тестирование и деплой Kittygram, а после успешного деплоя вам приходит сообщение в телеграм.
-- В корне проекта есть файл `kittygram_workflow.yml`.
+```
+POSTGRES_USER=Пользователь БД
+POSTGRES_PASSWORD=Пароль пользователя БД
+POSTGRES_DB=БД
+DB_NAME=Имя БД
+DB_HOST=db
+DB_PORT=5432
+
+SECRET_KEY = Секретный ключ джанго-проекта
+ALLOWED_HOSTS = Разрешенные хосты
+DEBUG='False'
+```
+
+Запустить Dockercompose
+
+```
+sudo docker compose -f docker-compose.yml pull
+sudo docker compose -f docker-compose.yml down
+sudo docker compose -f docker-compose.yml up -d
+```
+
+Собрать статику и выполнить миграции
+
+```
+sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /backend_static/static/ 
+```
+
+## Автоматический деплой
+
+В репозитории есть файл kittygram_workflow.yml. В клонированном репозитории необходимо создать папку .github/workflows в корне каталога, создать в этой папке файл main.yml и скопировать в него данные из файла kittygram_workflow.yml. Далее необходимо добавить перменные в Secrets:
+
+```
+DB_PORT - порт, по которому Django будет обращаться к базе данных  
+DEBUG - режим запуска сервера
+DOCKER_PASSWORD - пароль от Docker Hub
+DOCKER_USERNAME - имя пользователя Docker Hub
+HOST - адрес, по которому Django будет соединяться с базой данных
+POSTGRES_DB - БД
+POSTGRES_PASSWORD - пароль пользователя БД
+POSTGRES_USER - пользователь БД
+SECRET_KEY - секретный ключ джанго проекта
+SSH_KEY - ключ ssh для доступа к удаленному серверу
+SSH_PASSPHRASE - пароль ssh
+TELEGRAM_TO - id пользователя TELEGRAM
+TELEGRAM_TOKEN - TELEGRAM токен
+USER - имя пользователя сервера
+```
+Далее запуште обновленный репозиторий.
